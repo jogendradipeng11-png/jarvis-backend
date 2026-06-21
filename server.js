@@ -85,11 +85,11 @@ app.post('/api/jarvis', async (req, res) => {
             }
         }
 
-        // 2. REAL-TIME AI GENERATIVE CHAT BRAIN (Gemini Integration)
+        // 2. REAL-TIME AI GENERATIVE CHAT BRAIN (Fixed to native fetch architecture)
         const GEMINI_KEY = process.env.GEMINI_API_KEY;
         if (GEMINI_KEY) {
             try {
-                const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+                // Utilizing the modern global fetch native to Node.js 24 without dependencies
                 const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -97,6 +97,7 @@ app.post('/api/jarvis', async (req, res) => {
                         contents: [{ parts: [{ text: `You are Jarvis, a real-time smart home AI assistant. Address the user respectfully as "sir". Keep your responses helpful, highly intelligent, natural, and concise so they can be easily spoken out loud. The user says: "${text}"` }] }]
                     })
                 });
+                
                 const data = await aiResponse.json();
                 if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
                     let aiText = data.candidates[0].content.parts[0].text.trim();
@@ -111,7 +112,7 @@ app.post('/api/jarvis', async (req, res) => {
         const localResponse = processLocalFallback(norm, liveClock);
         if (localResponse) return res.json(localResponse);
 
-        res.json({ reply_text: "I am tracking your parameters sir, but I require an active cloud token extension to answer complex general knowledge fields." });
+        res.json({ reply_text: "System core is online, sir. However, the Gemini API engine returned an empty response loop. Please check your cloud configuration parameters." });
 
     } catch (err) {
         console.error("Internal Engine Error Stack: ", err);
