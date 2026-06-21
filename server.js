@@ -72,43 +72,35 @@ app.post('/api/jarvis', async (req, res) => {
             }
         }
 
-        // 2. UNRESTRICTED GLOBAL REAL-TIME AI BRAIN
-        const AI_KEY = process.env.JARVIS_AI_KEY;
-        if (AI_KEY) {
+        // 2. DIRECT NATIVE GOOGLE GEMINI CORE LINK
+        const GEMINI_KEY = process.env.GEMINI_API_KEY;
+        if (GEMINI_KEY) {
             try {
-                const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${AI_KEY}`
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        // Swapping to OpenRouter's most powerful, completely open free models:
-                        model: "meta-llama/llama-3-8b-instruct:free", 
-                        messages: [
-                            { role: "system", content: "You are Jarvis, a highly intelligent smart home AI assistant. Always address the user respectfully as 'sir'. Keep answers helpful, concise, and natural so they speak out loud easily." },
-                            { role: "user", content: text }
-                        ]
+                        contents: [{ parts: [{ text: `You are Jarvis, a highly intelligent smart home assistant. Always address the user respectfully as "sir". Keep answers helpful, concise, and natural so they speak out loud easily. User request: "${text}"` }] }]
                     })
                 });
                 
                 const data = await aiResponse.json();
-                if (data.choices?.[0]?.message?.content) {
-                    return res.json({ reply_text: data.choices[0].message.content.trim() });
+                if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                    return res.json({ reply_text: data.candidates[0].content.parts[0].text.trim() });
                 }
             } catch (aiErr) {
-                console.error("Global AI Route Error: ", aiErr);
+                console.error("Gemini Native Error: ", aiErr);
             }
         }
 
-        // 3. HARDWARE NODES NOMINAL FALLBACK
-        res.json({ reply_text: "System cores are active, sir. Standing by for specific device instructions." });
+        // 3. FINAL BACKUP RESPONSE
+        res.json({ reply_text: "Systems are running stably, sir. Ready for commands." });
 
     } catch (err) {
-        console.error("Internal Engine Error Stack: ", err);
-        res.status(500).json({ error: "Internal processing failure caught." });
+        console.error("Internal Error: ", err);
+        res.status(500).json({ error: "Internal processing error." });
     }
 });
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`🚀 Jarvis Unrestricted Live Brain running on Port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Jarvis Engine Active on Port ${PORT}`));
